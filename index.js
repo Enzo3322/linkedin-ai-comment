@@ -19,7 +19,27 @@ const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const posts = await page.evaluate(() => {
     const postElements = document.querySelectorAll(".feed-shared-update-v2");
-    return Array.from(postElements)
+
+    const userPosts = Array.from(postElements).filter((post) => {
+      const isAd =
+        post
+          .querySelector(".update-components-actor__description")
+          ?.innerText.includes("Promovido") ||
+        post
+          .querySelector(".update-components-actor__sub-description")
+          ?.innerText.includes("Promovido") ||
+        false;
+
+      return !isAd;
+    });
+
+    // abre os comentários de todos os posts de usuários
+    userPosts.forEach((post) => {
+      const commentButton = post.querySelector(".comment-button");
+      if (commentButton) commentButton.click();
+    });
+
+    return Array.from(userPosts)
       .map((post) => {
         const text =
           post.querySelector(".update-components-text")?.innerText || "";
@@ -61,16 +81,6 @@ const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   ) {
     const postText = posts[i];
     const comment = await generateComment(postText);
-
-    await page.evaluate(
-      (idx, commentText) => {
-        const post = document.querySelectorAll(".feed-shared-update-v2")[idx];
-        const commentButton = post.querySelector(".comment-button"); // certo
-        if (commentButton) commentButton.click();
-      },
-      i,
-      comment
-    );
 
     await timeout(1000);
 

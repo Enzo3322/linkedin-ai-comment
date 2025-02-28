@@ -18,20 +18,8 @@ const timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   await page.waitForSelector(".feed-shared-update-v2");
 
   const posts = await page.evaluate(() => {
-    const rawPosts = document.querySelectorAll(".feed-shared-update-v2");
-
-    const postsWithoutAds = Array.from(rawPosts).filter((post) => {
-      const isAd =
-        post
-          .querySelector(".update-components-actor__description")
-          .innerText.includes("Promovido") ||
-        post
-          .querySelector(".update-components-actor__sub-description")
-          .innerText.includes("Promovido");
-      return !isAd;
-    });
-
-    return Array.from(postsWithoutAds)
+    const postElements = document.querySelectorAll(".feed-shared-update-v2");
+    return Array.from(postElements)
       .map((post) => {
         const text =
           post.querySelector(".update-components-text")?.innerText || "";
